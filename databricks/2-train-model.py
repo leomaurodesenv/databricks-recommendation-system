@@ -129,7 +129,3 @@ with mlflow.start_run(experiment_id=experiment.experiment_id):
     )
 
 f'RMSE: {rmse}', f'MAE: {mae}'
-
-# COMMAND ----------
-
-
