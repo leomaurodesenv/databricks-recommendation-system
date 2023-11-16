@@ -13,7 +13,10 @@
 import mlflow
 import pandas as pd
 
+from pyspark.sql import functions as f
 from databricks import feature_store
+from databricks.feature_store import FeatureLookup
+
 from surprise import SVD, accuracy
 from surprise import Dataset, Reader
 from surprise.model_selection import cross_validate
@@ -25,6 +28,8 @@ from surprise.model_selection import train_test_split
 # MAGIC ## Read Feature Tables
 # MAGIC
 # MAGIC Databricks is a powerful data engineering and analytics platform that provides a wide range of tools for data processing, analysis, and visualization. One of the key features of Databricks is the ability to read feature tables, which are essentially structured data tables that contain a set of features or attributes that describe a particular entity or object. Feature tables are commonly used in machine learning and data science applications for tasks such as feature engineering, model training, and prediction.
+# MAGIC
+# MAGIC - Use a `FeatureLookup` to build a training dataset that uses the specified `lookup_key` to lookup features from the feature table. If you do not specify the `feature_names` parameter, all features except the primary key are returned (if using the `exclude_columns` option).
 
 # COMMAND ----------
 
@@ -32,8 +37,23 @@ from surprise.model_selection import train_test_split
 fs = feature_store.FeatureStoreClient()
 
 # Read Ratings from Feature Store
+# You just need to provide a list of IDs
 ratings = fs.read_table("default.ratings")
-ratings.display()
+ratings = ratings.select("User-ID", "ISBN")
+ratings = ratings.withColumn("label", f.lit("fake"))
+
+def load_data(table_name, lookup_key):
+    # In the FeatureLookup, if you do not provide the `feature_names` parameter, all features except primary keys are returned
+    model_feature_lookups = [FeatureLookup(table_name=table_name, lookup_key=lookup_key)]
+ 
+    # fs.create_training_set looks up features in model_feature_lookups that match the primary key from inference_data_df
+    dataset = fs.create_training_set(ratings, model_feature_lookups, label="label")
+    dataset_df = dataset.load_df().toPandas()
+    return dataset_df, dataset
+
+dataset_df, lookup_set = load_data("default.ratings", ["User-ID", "ISBN"])
+dataset_df = dataset_df.drop(columns="label")
+dataset_df
 
 # COMMAND ----------
 
@@ -47,13 +67,12 @@ ratings.display()
 # COMMAND ----------
 
 # It only operates with pandas.DataFrame
-ratings_df = ratings.toPandas()
-ratings_range = ratings_df["Book-Rating"].min(), ratings_df["Book-Rating"].max()
+ratings_range = dataset_df["Book-Rating"].min(), dataset_df["Book-Rating"].max()
 
 # Creating surprise.Dataset
 # The columns must correspond to user id, item id and ratings (in that order).
 reader = Reader(rating_scale=(ratings_range[0], ratings_range[1]))
-dataset = Dataset.load_from_df(ratings_df[["User-ID", "ISBN", "Book-Rating"]], reader)
+dataset = Dataset.load_from_df(dataset_df[["User-ID", "ISBN", "Book-Rating"]], reader)
 
 # COMMAND ----------
 
@@ -101,6 +120,12 @@ with mlflow.start_run(experiment_id=experiment.experiment_id):
     mlflow.log_metric("RMSE", rmse)
     mlflow.log_metric("MAE", mae)
     # track model (depends on model type)
-    mlflow.sklearn.log_model(algorithm, 'model')
+    fs.log_model(
+        model=algorithm,
+        artifact_path="model",
+        training_set=lookup_set,
+        flavor=mlflow.sklearn,
+        registered_model_name="svd",
+    )
 
 f'RMSE: {rmse}', f'MAE: {mae}'
