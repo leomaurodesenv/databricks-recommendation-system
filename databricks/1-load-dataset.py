@@ -103,7 +103,3 @@ fs.create_table(
     df=ratings,
     description="Contains the book rating information. Ratings (Book-Rating) are either explicit, expressed on a scale from 1-10 (higher values denoting higher appreciation), or implicit, expressed by 0."
 )
-
-# COMMAND ----------
-
-
