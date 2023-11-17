@@ -1,16 +1,20 @@
 # Databricks notebook source
+# MAGIC %md
+# MAGIC # Download and Load Dataset
+# MAGIC
+# MAGIC To build a Recommendation System (RecSys), the first step is to gather a relevant dataset. There are various sources from where you can download datasets such as GitHub, Huggingface, or Kaggle. In this repository, we will employ the [Book Recommendation Dataset](https://www.kaggle.com/datasets/arashnic/book-recommendation-dataset?select=Ratings.csv). Book Recommendation Dataset is a RecSys dataset about books, users and ratings.
+
+# COMMAND ----------
+
+# MAGIC %pip install kaggle
+
+# COMMAND ----------
+
 import zipfile
 import pandas as pd
 
 from pathlib import Path
 from databricks import feature_store
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC # Download and Load Dataset
-# MAGIC
-# MAGIC To build a Recommendation System (RecSys), the first step is to gather a relevant dataset. There are various sources from where you can download datasets such as GitHub, Huggingface, or Kaggle. In this repository, we will employ the [Book Recommendation Dataset](https://www.kaggle.com/datasets/arashnic/book-recommendation-dataset?select=Ratings.csv). Book Recommendation Dataset is a RecSys dataset about books, users and ratings.
 
 # COMMAND ----------
 
@@ -27,10 +31,6 @@ from databricks import feature_store
 # MAGIC
 # MAGIC Reference
 # MAGIC - https://www.kaggle.com/datasets/arashnic/book-recommendation-dataset
-
-# COMMAND ----------
-
-# MAGIC %pip install kaggle
 
 # COMMAND ----------
 
