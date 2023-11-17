@@ -2,7 +2,7 @@
 # MAGIC %md
 # MAGIC # Data Science Modeling
 # MAGIC
-# MAGIC Data science modeling is a crucial step in the data science lifecycle that involves building predictive models using statistical and machine learning techniques. In this tutorial, we employ [Surprise](https://github.com/NicolasHug/Surprise) Data Science package to build our model. Susprise is a Python scikit for building and analyzing Recommendation Systems. 
+# MAGIC Data science modeling is a crucial step in the data science lifecycle that involves building predictive models using statistical and machine learning techniques. In this tutorial, we employ [Surprise](https://github.com/NicolasHug/Surprise) Data Science package to build our model. Susprise is a Python scikit for building and analyzing Recommendation Systems.
 
 # COMMAND ----------
 
@@ -11,7 +11,6 @@
 # COMMAND ----------
 
 import mlflow
-import pandas as pd
 
 from pyspark.sql import functions as f
 from databricks import feature_store
@@ -42,14 +41,18 @@ ratings = fs.read_table("default.ratings")
 ratings = ratings.select("User-ID", "ISBN")
 ratings = ratings.withColumn("label", f.lit("fake"))
 
+
 def load_data(table_name, lookup_key):
     # In the FeatureLookup, if you do not provide the `feature_names` parameter, all features except primary keys are returned
-    model_feature_lookups = [FeatureLookup(table_name=table_name, lookup_key=lookup_key)]
- 
+    model_feature_lookups = [
+        FeatureLookup(table_name=table_name, lookup_key=lookup_key)
+    ]
+
     # fs.create_training_set looks up features in model_feature_lookups that match the primary key from inference_data_df
     dataset = fs.create_training_set(ratings, model_feature_lookups, label="label")
     dataset_df = dataset.load_df().toPandas()
     return dataset_df, dataset
+
 
 dataset_df, lookup_set = load_data("default.ratings", ["User-ID", "ISBN"])
 dataset_df = dataset_df.drop(columns="label")
@@ -80,7 +83,9 @@ dataset = Dataset.load_from_df(dataset_df[["User-ID", "ISBN", "Book-Rating"]], r
 algorithm = SVD()
 
 # Run 5-fold cross-validation and print results
-results = cross_validate(algorithm, dataset, measures=["RMSE", "MAE"], cv=5, verbose=True)
+results = cross_validate(
+    algorithm, dataset, measures=["RMSE", "MAE"], cv=5, verbose=True
+)
 
 # COMMAND ----------
 
@@ -113,8 +118,8 @@ with mlflow.start_run(experiment_id=experiment.experiment_id):
     algorithm.fit(trainset)
     # score
     predictions = algorithm.test(testset)
-    rmse = accuracy.rmse(predictions,verbose=False)
-    mae = accuracy.mae(predictions,verbose=False)
+    rmse = accuracy.rmse(predictions, verbose=False)
+    mae = accuracy.mae(predictions, verbose=False)
 
     # logging experiment
     mlflow.log_metric("RMSE", rmse)
@@ -125,7 +130,7 @@ with mlflow.start_run(experiment_id=experiment.experiment_id):
         artifact_path="model",
         training_set=lookup_set,
         flavor=mlflow.sklearn,
-        registered_model_name="svd",
+        registered_model_name="book-recsys-svd",
     )
 
-f'RMSE: {rmse}', f'MAE: {mae}'
+f"RMSE: {rmse}", f"MAE: {mae}"

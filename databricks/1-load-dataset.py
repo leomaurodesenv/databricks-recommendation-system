@@ -1,16 +1,23 @@
 # Databricks notebook source
-import zipfile
-import pandas as pd
-
-from pathlib import Path
-from databricks import feature_store
-
-# COMMAND ----------
-
 # MAGIC %md
 # MAGIC # Download and Load Dataset
 # MAGIC
 # MAGIC To build a Recommendation System (RecSys), the first step is to gather a relevant dataset. There are various sources from where you can download datasets such as GitHub, Huggingface, or Kaggle. In this repository, we will employ the [Book Recommendation Dataset](https://www.kaggle.com/datasets/arashnic/book-recommendation-dataset?select=Ratings.csv). Book Recommendation Dataset is a RecSys dataset about books, users and ratings.
+
+# COMMAND ----------
+
+# MAGIC %pip install kaggle
+
+# COMMAND ----------
+
+import zipfile
+import pandas as pd
+
+from pathlib import Path
+from pyspark.sql import SparkSession
+from databricks import feature_store
+
+spark = SparkSession.builder.getOrCreate()
 
 # COMMAND ----------
 
@@ -27,10 +34,6 @@ from databricks import feature_store
 # MAGIC
 # MAGIC Reference
 # MAGIC - https://www.kaggle.com/datasets/arashnic/book-recommendation-dataset
-
-# COMMAND ----------
-
-# MAGIC %pip install kaggle
 
 # COMMAND ----------
 
@@ -87,19 +90,19 @@ fs.create_table(
     name="default.books",
     primary_keys=["ISBN"],
     df=books,
-    description="Books are identified by their respective ISBN. Invalid ISBNs have already been removed from the dataset. Moreover, some content-based information is given (Book-Title, Book-Author, Year-Of-Publication, Publisher), obtained from Amazon Web Services. Note that in case of several authors, only the first is provided. URLs linking to cover images are also given, appearing in three different flavours (Image-URL-S, Image-URL-M, Image-URL-L), i.e., small, medium, large. These URLs point to the Amazon web site."
+    description="Books are identified by their respective ISBN. Invalid ISBNs have already been removed from the dataset. Moreover, some content-based information is given (Book-Title, Book-Author, Year-Of-Publication, Publisher), obtained from Amazon Web Services. Note that in case of several authors, only the first is provided. URLs linking to cover images are also given, appearing in three different flavours (Image-URL-S, Image-URL-M, Image-URL-L), i.e., small, medium, large. These URLs point to the Amazon web site.",
 )
 
 fs.create_table(
     name="default.users",
     primary_keys=["User-ID"],
     df=users,
-    description="Contains the users. Note that user IDs (User-ID) have been anonymized and map to integers. Demographic data is provided (Location, Age) if available. Otherwise, these fields contain NULL-values."
+    description="Contains the users. Note that user IDs (User-ID) have been anonymized and map to integers. Demographic data is provided (Location, Age) if available. Otherwise, these fields contain NULL-values.",
 )
 
 fs.create_table(
     name="default.ratings",
     primary_keys=["User-ID", "ISBN"],
     df=ratings,
-    description="Contains the book rating information. Ratings (Book-Rating) are either explicit, expressed on a scale from 1-10 (higher values denoting higher appreciation), or implicit, expressed by 0."
+    description="Contains the book rating information. Ratings (Book-Rating) are either explicit, expressed on a scale from 1-10 (higher values denoting higher appreciation), or implicit, expressed by 0.",
 )

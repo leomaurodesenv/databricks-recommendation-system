@@ -1,0 +1,18 @@
+name: "Continuous Integration"
+
+run-name: Running tests on "${{ github.ref }}" by "${{ github.actor }}"
+
+on: push
+
+jobs:
+  ## Python linter check
+  code-linter:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+          cache: "pip" # caching pip dependencies
+      - run: pip install ruff
+      - run: ruff check databricks
