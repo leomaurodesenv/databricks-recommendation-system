@@ -14,7 +14,10 @@ import zipfile
 import pandas as pd
 
 from pathlib import Path
+from pyspark.sql import SparkSession
 from databricks import feature_store
+
+spark = SparkSession.builder.getOrCreate()
 
 # COMMAND ----------
 

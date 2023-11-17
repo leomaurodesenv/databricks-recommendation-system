@@ -11,7 +11,6 @@
 # COMMAND ----------
 
 import mlflow
-import pandas as pd
 
 from pyspark.sql import functions as f
 from databricks import feature_store
