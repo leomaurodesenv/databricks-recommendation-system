@@ -2,7 +2,7 @@
 
 [![GitHub](https://img.shields.io/static/v1?label=Code&message=GitHub&color=blue&style=flat-square)](https://github.com/leomaurodesenv/databricks-recommendation-system)
 [![MIT license](https://img.shields.io/static/v1?label=License&message=MIT&color=blue&style=flat-square)](LICENSE)
-[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/leomaurodesenv/dvc-luigi-nlp/continuous-integration.yml?label=Build&style=flat-square)](https://github.com/leomaurodesenv/databricks-recommendation-system/actions/workflows/continuous-integration.yml)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/leomaurodesenv/databricks-recommendation-system/continuous-integration.yml?label=Build&style=flat-square)](https://github.com/leomaurodesenv/databricks-recommendation-system/actions/workflows/continuous-integration.yml)
 
 This project study aims to implement a **recommendation system** model using Databricks Feature Store, MLflow, and Surprise modules. The goal of the project is to build an accurate recommendation system using all tracking functionalities from Databricks environment.
 
